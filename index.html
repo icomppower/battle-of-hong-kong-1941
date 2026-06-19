@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>香港保衛戰 1941 · The Battle of Hong Kong</title>
+<meta name="description" content="An interactive, to-scale 3D documentary of the Battle of Hong Kong (8–25 December 1941) — rendered on real Hong Kong terrain with a directed cinematic camera and bilingual narration." />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="The Battle of Hong Kong, 1941 — interactive 3D documentary" />
+<meta property="og:description" content="A to-scale 3D retelling of the 18-day battle on real Hong Kong terrain. Three.js, no build, no backend, no API keys." />
+<meta property="og:url" content="https://github.com/keithligh/battle-of-hong-kong-1941" />
+<!-- og:image: add a committed share image and set its absolute URL here for rich link previews -->
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%2306080c'/><rect width='8' height='16' fill='%23e23b3b'/><rect x='8' width='8' height='16' fill='%233b7be2'/></svg>" />
+<style>
+  :root{
+    --jp:#e23b3b; --jp-glow:#ff6a5a; --uk:#3b7be2; --uk-glow:#5aa0ff;
+    --ink:#eee6d2; --ink-dim:#b3a98c; --paper:#06080c;
+    --panel:rgba(12,15,21,.74); --panel-edge:rgba(210,190,140,.26); --accent:#d8c08a;
+    --mono:"Consolas","SFMono-Regular",ui-monospace,monospace;
+    --cjk:"Microsoft JhengHei","PingFang TC","Noto Sans TC","Heiti TC",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--paper);color:var(--ink);font-family:var(--cjk)}
+  #scene{position:fixed;inset:0;z-index:0}
+  /* soft lower-third scrim: darkens the bottom band behind the caption so text is always legible,
+     sits BELOW the on-map labels (z2) so place/unit labels stay bright */
+  #lower-scrim{position:fixed;left:0;right:0;bottom:0;height:44%;z-index:1;pointer-events:none;
+    background:linear-gradient(to top, rgba(4,7,12,0.84) 0%, rgba(4,7,12,0.5) 36%, rgba(4,7,12,0) 100%)}
+  #labels{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+
+  /* ---------- place / terrain labels (CSS2D) ---------- */
+  .lbl{transform:translate(-50%,-50%);text-align:center;text-shadow:0 1px 4px #000,0 0 8px #000;white-space:nowrap;user-select:none;transition:opacity .45s}
+  .lbl .zh{font-family:var(--cjk);font-weight:700;letter-spacing:1px}
+  .lbl .en{font-family:var(--mono);letter-spacing:.5px;opacity:.72;font-size:.62em}
+  .lbl.region .zh{font-size:19px;color:#f2ead2}
+  .lbl.peak .zh{font-size:13px;color:#e7d6a6}
+  .lbl.peak::before{content:"▲";display:block;font-size:9px;color:#cdb877;margin-bottom:-2px}
+  .lbl.bay .zh,.lbl.town .zh{font-size:12px;color:#bfd4e8}
+  .lbl.fort .zh{font-size:12px;color:#f0b48a}
+  .lbl.linelbl .zh{font-size:12px;font-weight:700;letter-spacing:1px}
+
+  /* ---------- unit flag labels (CSS2D) ---------- */
+  .unit{transform:translate(-50%,-115%);min-width:90px;pointer-events:none;text-align:center;transition:opacity .45s}
+  .unit .name{font-family:var(--cjk);font-weight:700;font-size:12px;line-height:1.15;text-shadow:0 1px 3px #000,0 0 6px #000}
+  .unit .cmd{font-family:var(--mono);font-size:9.5px;opacity:.85;text-shadow:0 1px 2px #000}
+  .unit.jp .name{color:#ffd9d2} .unit.uk .name{color:#d6e6ff}
+
+  /* ---------- title ---------- */
+  .panel{background:var(--panel);border:1px solid var(--panel-edge);border-radius:10px;backdrop-filter:blur(7px);box-shadow:0 8px 30px rgba(0,0,0,.55)}
+  #hud-tl{position:fixed;z-index:5;top:16px;left:18px;display:flex;flex-direction:column;align-items:flex-start;gap:9px;max-width:min(330px,82vw);pointer-events:none}
+  #title{padding:9px 15px 10px;pointer-events:auto}
+  #title h1{font-family:var(--cjk);font-size:21px;letter-spacing:3px;color:#f4ecd6;line-height:1}
+  #title .sub{font-family:var(--mono);font-size:9.5px;letter-spacing:2px;color:var(--ink-dim);margin-top:4px}
+  #notes-btn,#lang-btn,#music-btn{margin-top:7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.5px;color:var(--accent);
+    background:rgba(216,192,138,.08);border:1px solid var(--panel-edge);border-radius:6px;padding:3px 8px;cursor:pointer;transition:.18s}
+  #notes-btn:hover,#lang-btn:hover,#music-btn:hover{background:rgba(216,192,138,.2)}
+  #lang-btn,#music-btn{margin-left:6px}
+  #music-btn.off{opacity:.5}
+  /* ---------- credits ---------- */
+  #title .credit{margin-top:8px;font-family:var(--mono);font-size:9px;letter-spacing:.2px;color:var(--ink-dim);line-height:1.45;max-width:230px}
+  #title .credit a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(216,192,138,.45)}
+  #title .credit a:hover{color:#fff}
+  #credit{position:fixed;z-index:6;left:50%;bottom:5px;transform:translateX(-50%);max-width:94vw;text-align:center;
+    font-family:var(--mono);font-size:10px;letter-spacing:.3px;color:rgba(216,222,232,.66);text-shadow:0 1px 2px #000,0 0 5px #000;pointer-events:none}
+  #credit a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(216,192,138,.55);pointer-events:auto}
+  #credit a:hover{color:#fff}
+
+  /* ---------- tiny faction key ---------- */
+  #key{position:fixed;z-index:5;top:16px;right:18px;padding:8px 12px;font-size:11px}
+  #key .row{display:flex;align-items:center;gap:7px;margin:2px 0}
+  #key .sw{width:11px;height:11px;border-radius:3px;box-shadow:0 0 6px currentColor}
+  #key .ln{width:16px;height:0;border-top:3px solid currentColor;border-radius:2px;box-shadow:0 0 6px currentColor}
+  #key .jp{color:var(--jp)} #key .uk{color:var(--uk)} #key .front{color:#ffb24a} #key .gdl{color:#6fa0d8}
+  #key .jp .sw{background:var(--jp)} #key .uk .sw{background:var(--uk)}
+  #key .sep{height:1px;background:var(--panel-edge);margin:6px 0}
+  /* collapsible symbol key (native <details> — no JS) */
+  #key .syms{margin-top:5px}
+  #key .syms>summary{cursor:pointer;color:var(--accent);font-size:10px;letter-spacing:.5px;list-style:none;outline:none;opacity:.92}
+  #key .syms>summary::-webkit-details-marker{display:none}
+  #key .syms>summary::before{content:"▸ ";font-size:9px}
+  #key .syms[open]>summary::before{content:"▾ "}
+  #key .syms .row{margin:3px 0}
+  #key .gl{display:inline-flex;align-items:center;justify-content:center;width:14px;font-size:12px;color:var(--ink)}
+  #key .gl.mini{width:16px;height:6px;border-radius:2px;background:rgba(255,255,255,.14);overflow:hidden}
+  #key .gl.mini>i{display:block;height:100%;width:62%;background:linear-gradient(90deg,#1f3f7a,var(--uk))}
+  /* always-visible honesty tag — present-day-imagery disclosure (survives the ≤600px breakpoint) */
+  #disclaimer{max-width:100%;font-size:9.5px;line-height:1.32;
+    color:rgba(228,234,242,0.92);text-shadow:0 1px 2px #000,0 0 4px #000,0 0 9px rgba(0,0,0,.85);pointer-events:none;letter-spacing:.2px}
+
+  /* ---------- cinematic lower-third caption ---------- */
+  #caption{position:fixed;z-index:5;left:50%;bottom:78px;transform:translateX(-50%) translateY(14px);
+    width:min(760px,92vw);text-align:center;opacity:0;transition:opacity .7s,transform .7s;pointer-events:none}
+  #caption.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #caption .date{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--accent)}
+  #caption .ttl{font-family:var(--cjk);font-weight:700;font-size:30px;letter-spacing:2px;color:#f6efda;
+    margin:3px 0 2px;text-shadow:0 2px 16px #000,0 0 30px rgba(0,0,0,.8)}
+  #caption .ttl .en{display:block;font-family:var(--mono);font-weight:400;font-size:12px;letter-spacing:2px;color:var(--ink-dim);margin-top:3px}
+  #caption .narr{font-family:var(--cjk);font-size:14.5px;line-height:1.6;color:#f0e7d2;max-width:680px;margin:6px auto 0;
+    text-shadow:0 1px 3px #000,0 0 6px #000,0 0 14px rgba(0,0,0,.9)}
+  #caption .narr .nz{display:block}
+  #caption .narr .ne{display:block;font-family:var(--mono);font-size:11.5px;font-style:italic;color:#ded4b8;opacity:.92;margin-top:3px;letter-spacing:.3px}
+  #caption .meta{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:9px;flex-wrap:wrap}
+  #caption .cmd{font-family:var(--mono);font-size:11px;color:#f0e4c4;border:1px solid var(--panel-edge);
+    background:rgba(12,15,21,.5);border-radius:20px;padding:3px 11px}
+  #caption .str{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--ink-dim)}
+  #caption .str .bar{width:90px;height:5px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+  #caption .str .bar > i{display:block;height:100%}
+  #caption .str.jp .bar>i{background:linear-gradient(90deg,#7a1f1f,var(--jp))}
+  #caption .str.uk .bar>i{background:linear-gradient(90deg,#1f3f7a,var(--uk))}
+  #caption .str.jp{color:#ffb0a4} #caption .str.uk{color:#a8c6ff}
+
+  /* ---------- minimal transport controls (auto-hide) ---------- */
+  #controls{position:fixed;z-index:6;left:50%;bottom:32px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:14px;width:min(760px,92vw);transition:opacity .5s}
+  #controls.hide{opacity:0}
+  #play{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:1px solid var(--panel-edge);
+    background:var(--panel);color:var(--accent);font-size:16px;cursor:pointer;backdrop-filter:blur(6px);transition:.18s}
+  #play:hover{background:rgba(216,192,138,.22)}
+  #prog{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.12);position:relative;cursor:pointer}
+  #prog > i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--uk),var(--accent),var(--jp));transition:width .4s linear}
+  #prog .beats{position:absolute;inset:0;pointer-events:none}
+  #prog .beats b{position:absolute;top:-3px;width:2px;height:11px;background:rgba(255,255,255,.34);transform:translateX(-50%);border-radius:1px;pointer-events:auto;cursor:pointer}
+  #prog .beats b:hover{background:var(--accent);width:3px}
+  #scene-label{flex:0 0 auto;font-family:var(--mono);font-size:10px;color:var(--ink-dim);min-width:42px;text-align:right}
+
+  /* ---------- resume overlay (only while free-look) ---------- */
+  #resume{position:fixed;z-index:7;left:50%;top:24px;transform:translateX(-50%);display:none;
+    font-family:var(--cjk);font-size:13px;color:var(--ink);background:var(--panel);border:1px solid var(--accent);
+    border-radius:22px;padding:8px 18px;cursor:pointer;backdrop-filter:blur(6px);box-shadow:0 6px 22px rgba(0,0,0,.5)}
+  #resume.show{display:block}
+  #resume:hover{background:rgba(216,192,138,.2)}
+
+  /* ---------- notes / sources ---------- */
+  #notes{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9;width:min(620px,92vw);max-height:78vh;
+    display:none;flex-direction:column;overflow:hidden}
+  #notes.open{display:flex}
+  #notes .nhd{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;
+    border-bottom:1px solid var(--panel-edge);font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--accent)}
+  #notes .nhd button{background:none;border:none;color:var(--ink-dim);font-size:15px;cursor:pointer}
+  #notes .nbody{padding:14px 17px;overflow:auto;font-size:12.5px;line-height:1.65;color:var(--ink-dim)}
+  #notes .nbody p{margin-bottom:9px}
+  #notes .nbody h5{font-family:var(--cjk);font-size:13px;color:var(--accent);margin:13px 0 6px}
+  #notes .nbody ul{margin:0 0 6px 2px;list-style:none}
+  #notes .nbody li{position:relative;padding-left:15px;margin-bottom:7px}
+  #notes .nbody li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+
+  #hint{font-family:var(--mono);font-size:10px;color:var(--ink-dim);pointer-events:none;
+    background:var(--panel);border:1px solid var(--panel-edge);border-radius:8px;padding:6px 10px;max-width:200px;line-height:1.5;transition:opacity .5s}
+  #hint.hide{opacity:0}
+  #hint b{color:var(--accent)}
+
+  #boot{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at center,#131922,#04060a);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .8s}
+  #boot.gone{opacity:0;pointer-events:none}
+  #boot .bt{font-family:var(--cjk);font-size:30px;letter-spacing:7px;color:#f4ecd6}
+  #boot .bs{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--accent)}
+  #boot .bar{width:240px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+  #boot .bar>i{display:block;height:100%;width:30%;background:var(--accent);animation:load 1.1s ease-in-out infinite}
+  @keyframes load{0%{margin-left:-30%}100%{margin-left:100%}}
+  #boot .msg{font-family:var(--mono);font-size:10px;color:var(--ink-dim)}
+  #err{position:fixed;inset:0;z-index:60;background:#1a0d0d;color:#ffd9d2;font-family:var(--mono);font-size:13px;padding:40px;display:none;white-space:pre-wrap;overflow:auto}
+
+  @media (max-width:600px){
+    #title h1{font-size:17px} #caption .ttl{font-size:22px} #caption .narr{font-size:13px}
+    #key{font-size:10px;top:10px;right:10px;padding:6px 9px}
+    #caption .narr .ne{font-size:10.5px}
+    #credit{font-size:8px;bottom:3px} #title .credit{font-size:8px}
+  }
+  /* iPhone-class phones (SE 375 → Pro Max 430): shrink the top row so #title & #key never collide */
+  @media (max-width:440px){
+    #title{padding:6px 9px 7px}
+    #title h1{font-size:15px;letter-spacing:1.5px}
+    #title .sub{font-size:7px;letter-spacing:1px;margin-top:2px}
+    #notes-btn,#lang-btn{font-size:8px;margin-top:5px}
+    #title .credit{font-size:7px;margin-top:5px;max-width:165px;line-height:1.35}
+    #key{font-size:8px;top:10px;right:8px;padding:5px 6px}
+    #resume{top:112px}   /* free-look prompt drops below the title/legend row so it never overlaps them */
+  }
+</style>
+</head>
+<body>
+  <div id="scene"></div>
+  <div id="lower-scrim"></div>
+  <div id="labels"></div>
+
+  <div id="hud-tl">
+    <div id="title" class="panel">
+      <h1>香港保衛戰</h1>
+      <div class="sub" lang="en">THE BATTLE OF HONG KONG · 1941</div>
+      <button id="notes-btn" aria-label="史料說明 · Notes and sources">ⓘ 史料說明 · Notes</button>
+      <button id="lang-btn" aria-label="切換旁白語言 · Toggle narration language">中／EN</button>
+      <button id="music-btn" class="off" title="背景音樂 · Music" aria-label="背景音樂 · Background music">🔇</button>
+      <div class="credit">Built with ❤️ by Keith Li · <a href="https://www.linkedin.com/in/keithlihk/" target="_blank" rel="noopener">Follow on LinkedIn</a></div>
+    </div>
+    <div id="disclaimer">現代衛星影像 · 海岸線經填海已大幅改變 · 僅作示意<br>Present-day imagery — 1941 coastline differs · illustrative<br>影像 Sentinel-2 cloudless 2016 © EOX IT Services GmbH · s2maps.eu (modified Copernicus Sentinel data) · 高程 SRTM courtesy USGS</div>
+    <div id="hint" class="panel"><b>節目自動播放</b><br>拖曳可自由運鏡（會暫停導覽）</div>
+  </div>
+
+  <div id="key" class="panel">
+    <div class="row jp"><span class="sw"></span><span>日軍 Japanese</span></div>
+    <div class="row uk"><span class="sw"></span><span>英聯邦守軍 Allied</span></div>
+    <div class="sep"></div>
+    <div class="row front"><span class="ln"></span><span>戰線 Front line</span></div>
+    <div class="row gdl"><span class="ln"></span><span>醉酒灣防線 Gin Drinkers Line</span></div>
+    <details class="syms">
+      <summary>符號 Symbols</summary>
+      <div class="row"><span class="gl" style="color:var(--jp)">➤</span><span>進攻方向 Advance</span></div>
+      <div class="row"><span class="gl">◆</span><span>司令部 Headquarters</span></div>
+      <div class="row"><span class="gl">◎</span><span>交戰中 In contact</span></div>
+      <div class="row"><span class="gl mini"><i></i></span><span>兵力 Strength</span></div>
+      <div class="row"><span class="gl">→</span><span>調動方向 Movement</span></div>
+      <div class="row"><span class="gl" style="color:#ff8a3a">✦</span><span>戰火 Combat / fire</span></div>
+      <div class="row"><span class="gl" style="color:#9aa6b2">⚑</span><span>覆滅／投降 Lost / surrendered</span></div>
+    </details>
+  </div>
+
+  <!-- cinematic lower-third caption (driven by the Director) -->
+  <div id="caption">
+    <div class="date" id="cap-date"></div>
+    <div class="ttl" id="cap-title"></div>
+    <div class="narr" id="cap-narr"></div>
+    <div class="meta" id="cap-meta"></div>
+  </div>
+
+  <div id="credit" lang="en">Built by Keith Li · <a href="https://www.linkedin.com/in/keithlihk/" target="_blank" rel="noopener">LinkedIn</a></div>
+
+  <!-- minimal transport (auto-hides) -->
+  <div id="controls">
+    <button id="play" title="播放 / 暫停" aria-label="播放／暫停 · Play / pause">⏸</button>
+    <div id="prog" role="progressbar" aria-label="導覽進度 · Tour progress"><i></i><div class="beats" id="prog-beats"></div></div>
+    <div id="scene-label"></div>
+  </div>
+
+  <div id="resume">▶ 繼續導覽 · Resume tour</div>
+
+  <div id="notes" class="panel">
+    <div class="nhd"><span>史料說明 · NOTES &amp; SOURCES</span><button id="notes-close" aria-label="關閉 · Close">✕</button></div>
+    <div id="notes-body" class="nbody"></div>
+  </div>
+
+  <audio id="bgm" loop muted preload="auto" src="lib/victoria-harbour-1941.mp3"></audio>
+
+  <div id="boot">
+    <div class="bt">香港保衛戰</div>
+    <div class="bs">THE BATTLE OF HONG KONG · 1941</div>
+    <div class="bar"><i></i></div>
+    <div class="msg" id="boot-msg">載入真實地形中…</div>
+  </div>
+  <pre id="err"></pre>
+
+  <script src="lib/three.min.js"></script>
+  <script src="lib/OrbitControls.js"></script>
+  <script src="lib/CSS2DRenderer.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

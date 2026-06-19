@@ -1,0 +1,8 @@
+# Terrain + imagery tiles are NOT committed — run tools/fetch_tiles.ps1 to populate them.
+lib/tiles/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
