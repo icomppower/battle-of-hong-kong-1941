@@ -249,10 +249,12 @@
   </div>
   <pre id="err"></pre>
 
+  <!-- vendored Three.js r128 (classic globals) + scenario data load first, synchronously -->
   <script src="lib/three.min.js"></script>
   <script src="lib/OrbitControls.js"></script>
   <script src="lib/CSS2DRenderer.js"></script>
   <script src="data.js"></script>
-  <script src="app.js"></script>
+  <!-- the engine is ES modules; this entry runs after the classic scripts above, so global THREE / BATTLE_DATA exist when it evaluates -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>
