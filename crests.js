@@ -1,138 +1,148 @@
 /* =====================================================================
- *  crests.js — stylised original unit crests painted to a canvas, and the
- *  per-unit flag texture that stamps one onto a faction banner. Pure art:
- *  depends only on FAC (faction colours). Exports flagTexture().
+ *  crests.js — the per-unit flag texture. Each unit flies the real
+ *  national / service flag its force used in DECEMBER 1941 (not the
+ *  modern flag — see the anachronism rules below). Pure canvas art; no
+ *  external assets. Exports flagTexture(unit) → THREE.CanvasTexture.
+ *
+ *  Two reusable painters do the heavy lifting:
+ *    pUnionFlag  — the 1801 Union Flag, drawn once (the offset, counter-
+ *                  changed saltire is the one fiddly bit), reused as the
+ *                  canton of the White Ensign / Canadian + Indian Red
+ *                  Ensigns / Hong Kong Blue Ensign.
+ *    pRisingSun16 — the true 16-ray Rising Sun; the disc centre is a
+ *                  parameter, so it serves the IJA Army War Flag (centred)
+ *                  and the IJN Naval Ensign (offset toward the hoist).
+ *
+ *  Anachronism rules (verified, non-negotiable): 16 rays only (8 = 1954);
+ *  Canada's maple leaves are GREEN (red = 1957); India is the Star of
+ *  India Red Ensign (the tricolour is 1947); HK is the 1876 colonial
+ *  Blue Ensign (the Bauhinia is 1997). Detailed emblems (Canada's full
+ *  shield, the Star of India sunburst, the HK harbour badge) are reduced
+ *  to a legible identifying cue with the correct tinctures — a reduction
+ *  of a real sourced flag, NOT a new invention.
  * ===================================================================== */
-import { FAC } from "./config.js";
 
-/* ============================ CRESTS ============================== */
-const COL={ ink:"#16140f", red:"#c62828", gold:"#d8b24a", silver:"#dcdce2",
-  cream:"#f2ead2", green:"#3f7d40", pink:"#e58fa0", navy:"#16243f", brass:"#caa64a" };
-function pCrown(c,x,y,w){ c.fillStyle=COL.gold; c.beginPath();
-  c.moveTo(x-w,y+w*0.5); c.lineTo(x-w,y-w*0.3); c.lineTo(x-w*0.5,y+w*0.1);
-  c.lineTo(x,y-w*0.5); c.lineTo(x+w*0.5,y+w*0.1); c.lineTo(x+w,y-w*0.3);
-  c.lineTo(x+w,y+w*0.5); c.closePath(); c.fill(); c.fillRect(x-w,y+w*0.45,w*2,w*0.35); }
-function pMaple(c,x,y,r,col){ c.fillStyle=col||COL.red; c.beginPath();
+const W = 230, H = 150;
+const UK_BLUE = "#012169", UK_RED = "#C8102E", JP_RED = "#BC002D",
+      WHITE = "#ffffff", LEAF_GREEN = "#2e7d32", GOLD = "#d8b24a";
+
+/* ---- the 1801 Union Flag, drawn into the rect [X,Y,W,H] -------------- *
+ *  Written correctly ONCE and reused as a full flag and as the canton of
+ *  every British-system ensign below. The St Patrick (red) saltire is
+ *  counterchanged with the St Andrew (white) saltire: red lowermost in the
+ *  upper-hoist & lower-fly arms, uppermost in the lower-hoist & upper-fly. */
+function pUnionFlag(c, X, Y, w, h){
+  c.save();
+  c.beginPath(); c.rect(X, Y, w, h); c.clip();
+  c.fillStyle = UK_BLUE; c.fillRect(X, Y, w, h);
+  const cx = X + w/2, cy = Y + h/2;
+  // St Andrew — broad white diagonals
+  c.lineCap = "butt"; c.strokeStyle = WHITE; c.lineWidth = h*0.30;
+  c.beginPath(); c.moveTo(X, Y); c.lineTo(X+w, Y+h); c.moveTo(X+w, Y); c.lineTo(X, Y+h); c.stroke();
+  // St Patrick — counterchanged red, each arm offset to one side of the white
+  const off = h*0.10;
+  c.strokeStyle = UK_RED; c.lineWidth = h*0.10;
+  const corners = [[X,Y,0],[X+w,Y,1],[X+w,Y+h,2],[X,Y+h,3]]; // TL, TR, BR, BL
+  for(const [bx, by, i] of corners){
+    const dx = bx-cx, dy = by-cy, L = Math.hypot(dx,dy), px = -dy/L, py = dx/L;
+    const wantDown = (i===0 || i===2);                 // red lowermost on TL & BR arms
+    const s = wantDown ? (py>0?1:-1) : (py>0?-1:1);
+    const ox = px*off*s, oy = py*off*s;
+    c.beginPath(); c.moveTo(cx+ox, cy+oy); c.lineTo(bx+ox, by+oy); c.stroke();
+  }
+  // St George — white fimbriation then the red cross
+  const wW = h*0.30, rW = h*0.18;
+  c.fillStyle = WHITE; c.fillRect(cx-wW/2, Y, wW, h); c.fillRect(X, cy-wW/2, w, wW);
+  c.fillStyle = UK_RED; c.fillRect(cx-rW/2, Y, rW, h); c.fillRect(X, cy-rW/2, w, rW);
+  c.restore();
+}
+
+/* ---- the 16-ray Rising Sun; disc centre X = X + w*oxFrac ------------- */
+function pRisingSun16(c, X, Y, w, h, oxFrac){
+  c.save();
+  c.beginPath(); c.rect(X, Y, w, h); c.clip();
+  c.fillStyle = WHITE; c.fillRect(X, Y, w, h);
+  const ox = X + w*oxFrac, oy = Y + h/2, reach = Math.hypot(w, h)*1.1;
+  c.fillStyle = JP_RED;
+  for(let k=0;k<16;k++){                                // 16 red rays, 11.25° wide, 11.25° apart
+    const a0 = k*Math.PI/8, a1 = a0 + Math.PI/16;
+    c.beginPath(); c.moveTo(ox, oy);
+    c.lineTo(ox+Math.cos(a0)*reach, oy+Math.sin(a0)*reach);
+    c.lineTo(ox+Math.cos(a1)*reach, oy+Math.sin(a1)*reach);
+    c.closePath(); c.fill();
+  }
+  c.beginPath(); c.arc(ox, oy, h*0.30, 0, 7); c.fill();
+  c.restore();
+}
+
+/* ---- small flag-emblem helpers (real flag elements, not crests) ----- */
+function mapleLeaf(c, x, y, r, col){ c.fillStyle = col; c.beginPath();
   const pts=[[0,-1],[.18,-.5],[.55,-.62],[.42,-.22],[.92,-.18],[.55,.05],[.78,.42],
     [.3,.32],[.34,.86],[0,.55],[-.34,.86],[-.3,.32],[-.78,.42],[-.55,.05],[-.92,-.18],
     [-.42,-.22],[-.55,-.62],[-.18,-.5]];
-  pts.forEach((p,i)=>{ const X=x+p[0]*r, Y=y+p[1]*r; i?c.lineTo(X,Y):c.moveTo(X,Y); }); c.closePath(); c.fill(); }
-function pStar(c,x,y,r,n,col){ c.fillStyle=col||COL.gold; c.beginPath();
+  pts.forEach((p,i)=>{ const Px=x+p[0]*r, Py=y+p[1]*r; i?c.lineTo(Px,Py):c.moveTo(Px,Py); }); c.closePath(); c.fill(); }
+function starN(c, x, y, r, n, col){ c.fillStyle = col; c.beginPath();
   for(let i=0;i<n*2;i++){ const a=Math.PI/n*i-Math.PI/2, rr=i%2?r*0.42:r;
-    const X=x+Math.cos(a)*rr, Y=y+Math.sin(a)*rr; i?c.lineTo(X,Y):c.moveTo(X,Y); } c.closePath(); c.fill(); }
-function pAnchor(c,x,y,r,col){ c.strokeStyle=col||COL.silver; c.lineWidth=r*0.16; c.lineCap="round";
-  c.beginPath(); c.arc(x,y-r*0.7,r*0.2,0,7); c.stroke();
-  c.beginPath(); c.moveTo(x,y-r*0.5); c.lineTo(x,y+r*0.8); c.stroke();
-  c.beginPath(); c.moveTo(x-r*0.55,y+r*0.05); c.lineTo(x+r*0.55,y+r*0.05); c.stroke();
-  c.beginPath(); c.moveTo(x-r*0.7,y+r*0.55); c.quadraticCurveTo(x,y+r*1.05,x,y+r*0.8); c.stroke();
-  c.beginPath(); c.moveTo(x+r*0.7,y+r*0.55); c.quadraticCurveTo(x,y+r*1.05,x,y+r*0.8); c.stroke(); }
-function pBugle(c,x,y,r,col){ c.strokeStyle=col||COL.silver; c.lineWidth=r*0.14;
-  c.beginPath(); c.ellipse(x,y,r*0.8,r*0.5,0,0.2,Math.PI*1.7); c.stroke();
-  c.beginPath(); c.moveTo(x+r*0.7,y-r*0.25); c.lineTo(x+r*1.0,y-r*0.4); c.stroke(); }
-function pGrenade(c,x,y,r){ c.fillStyle=COL.gold; c.beginPath(); c.arc(x,y+r*0.2,r*0.55,0,7); c.fill();
-  c.fillRect(x-r*0.13,y-r*0.5,r*0.26,r*0.35); c.strokeStyle=COL.red; c.lineWidth=r*0.1; c.lineCap="round";
-  for(let i=-1;i<=1;i++){ c.beginPath(); c.moveTo(x+i*r*0.18,y-r*0.45);
-    c.quadraticCurveTo(x+i*r*0.5,y-r*0.9,x+i*r*0.15,y-r*1.05); c.stroke(); } }
-function pPlume(c,x,y,r){ c.fillStyle=COL.silver;
-  for(let i=-1;i<=1;i++){ c.save(); c.translate(x+i*r*0.32,y); c.rotate(i*0.28);
-    c.beginPath(); c.ellipse(0,-r*0.1,r*0.16,r*0.7,0,0,7); c.fill(); c.restore(); }
-  c.fillStyle=COL.gold; c.fillRect(x-r*0.5,y+r*0.55,r,r*0.2); }
-function pJunk(c,x,y,r,col){ c.fillStyle=col||COL.gold;
-  c.beginPath(); c.moveTo(x-r*0.8,y+r*0.4); c.lineTo(x+r*0.8,y+r*0.4);
-  c.lineTo(x+r*0.55,y+r*0.7); c.lineTo(x-r*0.55,y+r*0.7); c.closePath(); c.fill();
-  c.beginPath(); c.moveTo(x-r*0.1,y+r*0.35); c.lineTo(x-r*0.1,y-r*0.75);
-  c.quadraticCurveTo(x-r*0.7,y-r*0.5,x-r*0.55,y+r*0.2); c.closePath(); c.fill();
-  c.beginPath(); c.moveTo(x+r*0.18,y+r*0.35); c.lineTo(x+r*0.18,y-r*0.55);
-  c.quadraticCurveTo(x+r*0.72,y-r*0.3,x+r*0.6,y+r*0.25); c.closePath(); c.fill(); }
-function pCannon(c,x,y,r){ c.save(); c.strokeStyle=COL.silver; c.lineWidth=r*0.22; c.lineCap="round";
-  c.beginPath(); c.moveTo(x-r*0.7,y+r*0.6); c.lineTo(x+r*0.7,y-r*0.5); c.stroke();
-  c.beginPath(); c.moveTo(x+r*0.7,y+r*0.6); c.lineTo(x-r*0.7,y-r*0.5); c.stroke(); c.restore(); }
-function pFieldGun(c,x,y,r){ c.fillStyle=COL.brass; c.fillRect(x-r*0.2,y-r*0.15,r*1.1,r*0.22);
-  c.beginPath(); c.arc(x-r*0.25,y+r*0.4,r*0.4,0,7); c.fill();
-  c.fillStyle=COL.navy; c.beginPath(); c.arc(x-r*0.25,y+r*0.4,r*0.16,0,7); c.fill(); }
-function pSakura(c,x,y,r){ c.fillStyle=COL.pink;
-  for(let i=0;i<5;i++){ const a=-Math.PI/2+i*Math.PI*0.4;
-    c.save(); c.translate(x+Math.cos(a)*r*0.42,y+Math.sin(a)*r*0.42); c.rotate(a+Math.PI/2);
-    c.beginPath(); c.ellipse(0,0,r*0.26,r*0.42,0,0,7); c.fill(); c.restore(); }
-  c.fillStyle=COL.gold; c.beginPath(); c.arc(x,y,r*0.16,0,7); c.fill(); }
-function pReeds(c,x,y,r){ c.strokeStyle=COL.ink; c.lineWidth=r*0.1; c.lineCap="round";
-  for(let i=-2;i<=2;i++){ c.beginPath(); c.moveTo(x+i*r*0.2,y+r*0.7);
-    c.quadraticCurveTo(x+i*r*0.3,y-r*0.2,x+i*r*0.45,y-r*0.8); c.stroke(); } }
-function pIgeta(c,x,y,r){ c.strokeStyle=COL.ink; c.lineWidth=r*0.16; const s=r*0.55;
-  c.strokeRect(x-s,y-s,s*2,s*2);
-  c.beginPath(); c.moveTo(x-s*1.2,y-s*0.4); c.lineTo(x+s*1.2,y-s*0.4);
-  c.moveTo(x-s*1.2,y+s*0.4); c.lineTo(x+s*1.2,y+s*0.4);
-  c.moveTo(x-s*0.4,y-s*1.2); c.lineTo(x-s*0.4,y+s*1.2);
-  c.moveTo(x+s*0.4,y-s*1.2); c.lineTo(x+s*0.4,y+s*1.2); c.stroke(); }
-function pRiceField(c,x,y,r){ const s=r*0.6; c.strokeStyle=COL.ink; c.lineWidth=r*0.13;
-  c.strokeRect(x-s,y-s,s*2,s*2); c.beginPath(); c.moveTo(x,y-s); c.lineTo(x,y+s);
-  c.moveTo(x-s,y); c.lineTo(x+s,y); c.stroke(); c.strokeStyle=COL.green; c.lineWidth=r*0.09;
-  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(d=>{ c.beginPath();
-    c.moveTo(x+d[0]*s*1.2,y+d[1]*s*1.2); c.lineTo(x+d[0]*s*1.45,y+d[1]*s*1.5); c.stroke(); }); }
-function pRisingSun(c,x,y,r){ c.fillStyle=COL.red; c.beginPath(); c.arc(x,y-r*0.1,r*0.5,0,7); c.fill();
-  c.fillStyle=COL.red; for(let i=-1;i<=1;i++){ c.beginPath();   // red rays on the cream medallion — canonical Rising Sun
-    c.moveTo(x+i*r*0.4,y+r*0.7); c.lineTo(x+i*r*0.4-r*0.18,y+r*0.2); c.lineTo(x+i*r*0.4+r*0.18,y+r*0.2);
-    c.closePath(); c.fill(); } }
-function pLion(c,x,y,r){ c.fillStyle=COL.gold; c.beginPath();
-  c.moveTo(x-r*0.4,y+r*0.8); c.lineTo(x-r*0.3,y-r*0.2);
-  c.quadraticCurveTo(x-r*0.4,y-r*0.7,x-r*0.05,y-r*0.7); c.quadraticCurveTo(x+r*0.2,y-r*0.7,x+r*0.15,y-r*0.35);
-  c.lineTo(x+r*0.5,y-r*0.5); c.lineTo(x+r*0.3,y-r*0.1); c.lineTo(x+r*0.55,y+r*0.2);
-  c.lineTo(x+r*0.25,y+r*0.25); c.lineTo(x+r*0.3,y+r*0.8); c.lineTo(x+r*0.05,y+r*0.8);
-  c.lineTo(x,y+r*0.3); c.lineTo(x-r*0.1,y+r*0.8); c.closePath(); c.fill(); }
-function pWing(c,x,y,r){ c.fillStyle=COL.silver; c.beginPath();
-  c.moveTo(x-r,y); c.quadraticCurveTo(x,y-r*0.5,x+r,y-r*0.15);
-  c.quadraticCurveTo(x,y+r*0.2,x-r,y+r*0.15); c.closePath(); c.fill(); }
-const crests = {
-  sakai:(c,x,y,r)=>{ pCannon(c,x,y,r*0.9); pSakura(c,x,y,r*0.95);
-    c.fillStyle=COL.ink; c.font=`bold ${r*0.5}px serif`; c.textAlign="center"; c.fillText("廿三",x,y+r*1.15); },
-  sano:(c,x,y,r)=>{ pReeds(c,x,y,r); c.strokeStyle=COL.ink; c.lineWidth=r*0.08;
-    c.beginPath(); c.arc(x,y,r*0.92,0,7); c.stroke();
-    c.fillStyle=COL.ink; for(let i=-1;i<=1;i++){ c.beginPath(); c.arc(x+i*r*0.28,y+r*0.95,r*0.1,0,7); c.fill(); } },
-  doi:(c,x,y,r)=>{ pIgeta(c,x,y,r); },
-  tanaka:(c,x,y,r)=>{ pRiceField(c,x,y,r); },
-  shoji:(c,x,y,r)=>{ pRisingSun(c,x,y,r); },
-  kitajima:(c,x,y,r)=>{ pCannon(c,x,y,r); pStar(c,x,y-r*0.55,r*0.3,5,COL.silver); },
-  jp_air:(c,x,y,r)=>{ c.fillStyle=COL.red; c.beginPath(); c.arc(x,y,r*0.55,0,7); c.fill(); pWing(c,x,y,r*0.95); },
-  jp_navy:(c,x,y,r)=>{ pAnchor(c,x,y,r,COL.silver);
-    c.fillStyle=COL.red; c.beginPath(); c.arc(x+r*0.6,y-r*0.6,r*0.22,0,7); c.fill(); },
-  maltby:(c,x,y,r)=>{ pCrown(c,x,y-r*0.45,r*0.5); pLion(c,x,y+r*0.2,r*0.7); },
-  royalscots:(c,x,y,r)=>{ pStar(c,x,y,r,8,COL.gold); c.strokeStyle=COL.navy; c.lineWidth=r*0.16;
-    c.beginPath(); c.moveTo(x-r*0.6,y-r*0.6); c.lineTo(x+r*0.6,y+r*0.6);
-    c.moveTo(x+r*0.6,y-r*0.6); c.lineTo(x-r*0.6,y+r*0.6); c.stroke();
-    c.fillStyle=COL.cream; c.beginPath(); c.arc(x,y,r*0.28,0,7); c.fill(); },
-  rajput:(c,x,y,r)=>{ pLion(c,x,y,r); },
-  punjab:(c,x,y,r)=>{ pJunk(c,x,y,r*0.9,COL.gold); pCrown(c,x,y-r*0.85,r*0.32); },
-  middlesex:(c,x,y,r)=>{ pPlume(c,x,y,r); },
-  winnipeg:(c,x,y,r)=>{ pGrenade(c,x,y,r); pMaple(c,x,y+r*0.2,r*0.32,COL.red); },
-  royalrifles:(c,x,y,r)=>{ pBugle(c,x,y,r,COL.silver); pMaple(c,x,y+r*0.55,r*0.3,COL.green); },
-  hkvdc:(c,x,y,r)=>{ pJunk(c,x,y,r,COL.gold); },
-  lawson:(c,x,y,r)=>{ pMaple(c,x,y+r*0.1,r*0.85,COL.red); pCrown(c,x,y-r*0.5,r*0.34);
-    for(let i=-1;i<=1;i++) pStar(c,x+i*r*0.3,y+r*0.35,r*0.14,4,COL.gold); },
-  wallis:(c,x,y,r)=>{ pCrown(c,x,y-r*0.5,r*0.4);
-    for(let i=-1;i<=1;i++) pStar(c,x+i*r*0.3,y,r*0.16,4,COL.gold); pBugle(c,x,y+r*0.55,r*0.5,COL.silver); },
-  ra:(c,x,y,r)=>{ pFieldGun(c,x,y,r);
-    c.fillStyle=COL.cream; c.font=`bold ${r*0.34}px serif`; c.textAlign="center"; c.fillText("UBIQUE",x,y+r*0.9); },
-  rn:(c,x,y,r)=>{ pAnchor(c,x,y,r,COL.gold); pCrown(c,x,y-r*0.95,r*0.3); },
+    const Px=x+Math.cos(a)*rr, Py=y+Math.sin(a)*rr; i?c.lineTo(Px,Py):c.moveTo(Px,Py); } c.closePath(); c.fill(); }
+function junkHill(c, x, y, r){   // stylised junk + hill silhouette for the HK colonial badge
+  c.save(); c.beginPath(); c.arc(x, y, r, 0, 7); c.clip();
+  c.fillStyle = "#9fb8c8"; c.beginPath(); c.moveTo(x-r, y+r*0.25);   // hills
+  c.quadraticCurveTo(x-r*0.3, y-r*0.55, x+r*0.2, y+r*0.05);
+  c.quadraticCurveTo(x+r*0.6, y-r*0.35, x+r, y+r*0.2); c.lineTo(x+r, y+r); c.lineTo(x-r, y+r); c.closePath(); c.fill();
+  c.fillStyle = "#cfe0ea"; c.fillRect(x-r, y+r*0.38, r*2, r*0.62);   // water
+  c.fillStyle = "#7a5a3a"; c.beginPath();                            // sail
+  c.moveTo(x-r*0.04, y+r*0.40); c.lineTo(x-r*0.04, y-r*0.42); c.quadraticCurveTo(x-r*0.5, y-r*0.15, x-r*0.42, y+r*0.30); c.closePath(); c.fill();
+  c.fillStyle = "#3a2f25"; c.beginPath();                            // hull
+  c.moveTo(x-r*0.5, y+r*0.46); c.lineTo(x+r*0.5, y+r*0.46); c.lineTo(x+r*0.32, y+r*0.64); c.lineTo(x-r*0.32, y+r*0.64); c.closePath(); c.fill();
+  c.restore();
+}
+
+/* ---- the seven flags (canvas is W×H; field drawn first, then canton, then fly badge) ---- */
+function canton(c){ pUnionFlag(c, 0, 0, W*0.5, H*0.5); }   // top-left quarter
+const flags = {
+  // Imperial Japan — Rising Sun war flags (16-ray). IJA disc centred; IJN disc offset to the hoist (7/18).
+  ija:      (c)=> pRisingSun16(c, 0, 0, W, H, 0.5),
+  ijn:      (c)=> pRisingSun16(c, 0, 0, W, H, 7/18),
+  hinomaru: (c)=>{ c.fillStyle=WHITE; c.fillRect(0,0,W,H); c.fillStyle=JP_RED; c.beginPath(); c.arc(W*0.5,H*0.5,H*0.30,0,7); c.fill(); },
+  // United Kingdom — the Union Flag
+  union:    (c)=> pUnionFlag(c, 0, 0, W, H),
+  // Royal Navy — White Ensign (red St George cross + Union canton)
+  rn: (c)=>{ c.fillStyle=WHITE; c.fillRect(0,0,W,H);
+    const rW=H*0.16; c.fillStyle=UK_RED; c.fillRect(W/2-rW/2,0,rW,H); c.fillRect(0,H/2-rW/2,W,rW); canton(c); },
+  // Canada — 1922–57 Red Ensign (red field, Union canton, GREEN maple leaves on a white roundel)
+  canada: (c)=>{ c.fillStyle=UK_RED; c.fillRect(0,0,W,H); canton(c);
+    const dx=W*0.74, dy=H*0.5, dr=H*0.30;
+    c.fillStyle=WHITE; c.beginPath(); c.arc(dx,dy,dr,0,7); c.fill();
+    mapleLeaf(c, dx,         dy+dr*0.16, dr*0.46, LEAF_GREEN);   // sprig of three (period-correct = GREEN)
+    mapleLeaf(c, dx-dr*0.52, dy+dr*0.24, dr*0.36, LEAF_GREEN);
+    mapleLeaf(c, dx+dr*0.52, dy+dr*0.24, dr*0.36, LEAF_GREEN); },
+  // British India — Star of India Red Ensign (red field, Union canton, gold star roundel; NO motto lettering)
+  india: (c)=>{ c.fillStyle=UK_RED; c.fillRect(0,0,W,H); canton(c);
+    const dx=W*0.74, dy=H*0.5, dr=H*0.30;
+    c.fillStyle="#0b2a5b"; c.beginPath(); c.arc(dx,dy,dr*0.96,0,7); c.fill();   // dark garter ring
+    c.fillStyle="#f2ead2"; c.beginPath(); c.arc(dx,dy,dr*0.66,0,7); c.fill();
+    starN(c, dx, dy, dr*0.62, 5, GOLD); },
+  // Hong Kong — 1876 colonial Blue Ensign (blue field, Union canton, "local scene" badge → junk + hills)
+  hk: (c)=>{ c.fillStyle=UK_BLUE; c.fillRect(0,0,W,H); canton(c);
+    const dx=W*0.74, dy=H*0.5, dr=H*0.31;
+    c.fillStyle="#eef3f6"; c.beginPath(); c.arc(dx,dy,dr,0,7); c.fill();
+    junkHill(c, dx, dy, dr); },
 };
-const flagTexCache={};
+
+const flagTexCache = {};
 export function flagTexture(unit){
   if(flagTexCache[unit.id]) return flagTexCache[unit.id];
-  const W=230,H=150, cv=document.createElement("canvas"); cv.width=W; cv.height=H;
-  const c=cv.getContext("2d"); const f=FAC[unit.faction];
-  const g=c.createLinearGradient(0,0,W,H);
-  g.addColorStop(0,f.css); g.addColorStop(0.5,shade(f.css,1.18)); g.addColorStop(1,shade(f.css,0.7));
-  c.fillStyle=g; c.fillRect(0,0,W,H);
-  c.fillStyle="rgba(0,0,0,0.35)"; c.fillRect(0,0,12,H);
-  c.strokeStyle=unit.faction==="jp"?"#ffd9c8":"#cfe0ff"; c.lineWidth=4; c.strokeRect(6,6,W-12,H-12);
-  const cx=W*0.6, cy=H*0.5, R=50;
-  if(unit.faction==="jp"){ c.fillStyle=COL.cream; c.beginPath(); c.arc(cx,cy,R,0,7); c.fill();
-    c.strokeStyle=COL.ink; c.lineWidth=4; c.beginPath(); c.arc(cx,cy,R,0,7); c.stroke(); }
-  else { c.fillStyle=COL.cream; c.beginPath();
-    c.moveTo(cx-R,cy-R*0.8); c.lineTo(cx+R,cy-R*0.8); c.lineTo(cx+R,cy+R*0.2);
-    c.quadraticCurveTo(cx+R,cy+R*0.9,cx,cy+R*1.15); c.quadraticCurveTo(cx-R,cy+R*0.9,cx-R,cy+R*0.2);
-    c.closePath(); c.fill(); c.strokeStyle=COL.gold; c.lineWidth=4; c.stroke(); }
-  c.save(); (crests[unit.crest]||crests.doi)(c,cx,cy,R*0.78); c.restore();
-  const tex=new THREE.CanvasTexture(cv); tex.anisotropy=4; tex.needsUpdate=true;
-  flagTexCache[unit.id]=tex; return tex;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const c = cv.getContext("2d");
+  const draw = flags[unit.flag];
+  if(!draw) console.warn(`unknown flag "${unit.flag}" for ${unit.id} — falling back by faction`);
+  (draw || (unit.faction === "jp" ? flags.ija : flags.union))(c);
+  // subtle cloth shadow at the hoist (pole) edge — depth cue, kept clear of the canton emblems
+  const sh = c.createLinearGradient(0, 0, W*0.18, 0);
+  sh.addColorStop(0, "rgba(0,0,0,0.26)"); sh.addColorStop(1, "rgba(0,0,0,0)");
+  c.fillStyle = sh; c.fillRect(0, 0, W*0.18, H);
+  // thin neutral edge so the flag reads against the terrain
+  c.strokeStyle = "rgba(0,0,0,0.45)"; c.lineWidth = 3; c.strokeRect(1.5, 1.5, W-3, H-3);
+  const tex = new THREE.CanvasTexture(cv); tex.anisotropy = 4; tex.needsUpdate = true;
+  flagTexCache[unit.id] = tex; return tex;
 }
-function shade(hex,f){ const c=new THREE.Color(hex); c.multiplyScalar(f); return "#"+c.getHexString(); }

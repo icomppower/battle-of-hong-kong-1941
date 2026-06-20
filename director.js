@@ -10,6 +10,7 @@ import { camera, controls } from "./core.js";
 import { vec } from "./projection.js";
 import { Clock, setDay, lookTarget, unitById, setFocus } from "./state.js";
 import { sampleTrack } from "./entities.js";
+import { flagTexture } from "./crests.js";
 
 /* ===================== CAMERA & DIRECTOR ========================= */
 const TITLE_DUR=4.5;
@@ -121,6 +122,16 @@ export function wireUI(){
   const n=D.notes;
   $("notes-body").innerHTML=`<p>${n.summary}</p><h5>考據與呈現說明 · Caveats</h5><ul>`+
     n.caveats.map(c=>`<li>${c}</li>`).join("")+`</ul><h5>主要來源 · Sources</h5><p>${n.sources}</p>`;
+  // flag legend — real 1941 flag swatches, so the several flags on the Allied side read as distinct forces, not noise
+  const fk=$("flagkey");
+  if(fk){ [["ija","日軍陸軍","Imperial Japanese Army"],["ijn","日本海軍","Imperial Japanese Navy"],
+      ["union","英軍","Britain"],["india","英屬印度軍","British India"],["canada","加拿大軍","Canada"],
+      ["hk","香港","Hong Kong"],["rn","皇家海軍","Royal Navy"]].forEach(([flag,zh,en])=>{
+    const row=document.createElement("div"); row.className="row";
+    const sw=document.createElement("canvas"); sw.width=24; sw.height=16; sw.className="flagsw";
+    sw.getContext("2d").drawImage(flagTexture({id:"fk_"+flag,flag,faction:(flag==="ija"||flag==="ijn")?"jp":"uk"}).image,0,0,24,16);
+    const t=document.createElement("span"); t.innerHTML=`${zh} <span class="en">${en}</span>`;
+    row.append(sw,t); fk.append(row); }); }
   const np=$("notes");
   $("notes-btn").onclick=()=>np.classList.toggle("open");
   $("notes-close").onclick=()=>np.classList.remove("open");

@@ -56,13 +56,13 @@ window.BATTLE_DATA = (function () {
    * ---------------------------------------------------------------- */
   const units = [
     /* ===================== JAPANESE (red) ===================== */
-    { id:"jp_army", faction:JP, kind:"command", crest:"sakai", cf:false,
+    { id:"jp_army", faction:JP, kind:"command", flag:"ija", cf:false,
       name_zh:"第二十三軍", name_en:"23rd Army", type:"Field Army HQ",
       commander:{ zh:"酒井隆", en:"Lt-Gen Sakai Takashi", rank:"中将 / Lieutenant General" },
       note:"由廣州統籌全局；25日於半島酒店接受英軍投降。",
       track:[ {d:8,lng:114.10,lat:22.555,s:0,st:"hold"}, {d:26,lng:114.10,lat:22.555,s:0,st:"hold"} ] },
 
-    { id:"jp_38div", faction:JP, kind:"command", crest:"sano", cf:false,
+    { id:"jp_38div", faction:JP, kind:"command", flag:"ija", cf:false,
       name_zh:"第三十八師團（沼兵團 · 佐野部隊）", name_en:"38th Division", type:"Infantry Division HQ",
       commander:{ zh:"佐野忠義", en:"Lt-Gen Sano Tadayoshi", rank:"中将 / Lieutenant General" },
       note:"攻港主力。渡深圳河→破醉酒灣防線→奪九龍→夜渡登陸港島。",
@@ -70,7 +70,7 @@ window.BATTLE_DATA = (function () {
               {d:13,lng:114.175,lat:22.320,s:0,st:"hold"}, {d:19,lng:114.205,lat:22.295,s:0,st:"attack"},
               {d:22,lng:114.190,lat:22.270,s:0,st:"attack"}, {d:25,lng:114.185,lat:22.262,s:0,st:"hold"} ] },
 
-    { id:"jp_228", faction:JP, kind:"infantry", crest:"doi", cf:true,
+    { id:"jp_228", faction:JP, kind:"infantry", flag:"ija", cf:true,
       name_zh:"步兵第二二八聯隊（土井部隊）", name_en:"228th Infantry Regiment", type:"Infantry Regiment",
       commander:{ zh:"土井定七", en:"Col. Doi Sadashichi", rank:"大佐 / Colonel" },
       note:"奇襲攻陷城門碉堡，瓦解醉酒灣防線之西翼樞紐。",
@@ -80,7 +80,7 @@ window.BATTLE_DATA = (function () {
               {d:19,lng:114.185,lat:22.266,s:3500,st:"attack"}, {d:22,lng:114.166,lat:22.272,s:3340,st:"attack"},
               {d:25,lng:114.158,lat:22.282,s:3270,st:"hold"} ] },
 
-    { id:"jp_229", faction:JP, kind:"infantry", crest:"tanaka", cf:true,
+    { id:"jp_229", faction:JP, kind:"infantry", flag:"ija", cf:true,
       name_zh:"步兵第二二九聯隊（田中部隊）", name_en:"229th Infantry Regiment", type:"Infantry Regiment",
       commander:{ zh:"田中良三郎", en:"Col. Tanaka Ryosaburo", rank:"大佐 / Colonel" },
       note:"左翼。鯉魚門/西灣登陸→奪柏架山→東進迫近大潭、赤柱。",
@@ -89,7 +89,7 @@ window.BATTLE_DATA = (function () {
               {d:19,lng:114.217,lat:22.268,s:3650,st:"attack"}, {d:21,lng:114.207,lat:22.240,s:3500,st:"attack"},
               {d:24,lng:114.214,lat:22.226,s:3340,st:"attack"}, {d:25,lng:114.214,lat:22.220,s:3270,st:"attack"} ] },
 
-    { id:"jp_230", faction:JP, kind:"infantry", crest:"shoji", cf:true,
+    { id:"jp_230", faction:JP, kind:"infantry", flag:"ija", cf:true,
       name_zh:"步兵第二三〇聯隊（東海林部隊）", name_en:"230th Infantry Regiment", type:"Infantry Regiment",
       commander:{ zh:"東海林俊成", en:"Col. Shoji Toshinari", rank:"大佐 / Colonel" },
       note:"中路/右翼。北角登陸→繞渣甸山→奪黃泥涌峽（切斷港島）→南下淺水灣。",
@@ -98,7 +98,7 @@ window.BATTLE_DATA = (function () {
               {d:19,lng:114.187,lat:22.263,s:3570,st:"attack"}, {d:20,lng:114.187,lat:22.258,s:3500,st:"hold"},
               {d:22,lng:114.196,lat:22.235,s:3340,st:"attack"}, {d:25,lng:114.198,lat:22.226,s:3270,st:"attack"} ] },
 
-    { id:"jp_arty", faction:JP, kind:"artillery", crest:"kitajima", cf:true,
+    { id:"jp_arty", faction:JP, kind:"artillery", flag:"ija", cf:true,
       name_zh:"第一砲兵隊（北島集團）", label_zh:"第一砲兵隊", name_en:"1st Artillery Group", type:"Heavy / Siege Artillery",
       commander:{ zh:"北島驥子雄", en:"Lt-Gen Kitajima Kineo", rank:"中将 / Lieutenant General" },
       note:"九龍高地隔維港砲轟港島，登陸前後火力支援（24cm榴彈砲、150mm砲）。",
@@ -106,7 +106,7 @@ window.BATTLE_DATA = (function () {
               {d:13,lng:114.175,lat:22.330,s:4000,st:"attack"}, {d:18,lng:114.180,lat:22.315,s:4000,st:"attack"},
               {d:25,lng:114.185,lat:22.290,s:4000,st:"attack"} ] },
 
-    { id:"jp_air", faction:JP, kind:"air", crest:"jp_air", cf:true,
+    { id:"jp_air", faction:JP, kind:"air", flag:"ija", cf:true,
       name_zh:"第二十三軍飛行隊（飛行第四十五戰隊）", name_en:"23rd Army Air Unit", type:"Army Aviation",
       commander:{ zh:"", en:"45th Sentai · Ki-32 / Ki-27", rank:"~50–56 aircraft" },
       note:"開戰首日炸毀啟德RAF機群，全程奪取制空權並轟炸防線。",
@@ -114,7 +114,7 @@ window.BATTLE_DATA = (function () {
               {d:14,lng:114.180,lat:22.310,s:2000,st:"attack"}, {d:18,lng:114.190,lat:22.300,s:2000,st:"attack"},
               {d:24,lng:114.200,lat:22.240,s:2000,st:"attack"} ] },
 
-    { id:"jp_navy", faction:JP, kind:"navy", crest:"jp_navy", cf:true,
+    { id:"jp_navy", faction:JP, kind:"navy", flag:"ijn", cf:true,
       name_zh:"第二遣支艦隊", name_en:"2nd China Expeditionary Fleet", type:"IJN Bombardment / Blockade",
       commander:{ zh:"新見政一", en:"Vice-Adm Niimi Masaichi", rank:"海軍中将 / Vice Admiral" },
       note:"封鎖海路、砲擊支援（輕巡洋艦五十鈴及驅逐艦）。",
@@ -122,13 +122,13 @@ window.BATTLE_DATA = (function () {
               {d:25,lng:114.245,lat:22.255,s:2000,st:"attack"} ] },
 
     /* ===================== BRITISH / ALLIED (blue) ===================== */
-    { id:"uk_fortress", faction:UK, kind:"command", crest:"maltby", cf:false,
+    { id:"uk_fortress", faction:UK, kind:"command", flag:"union", cf:false,
       name_zh:"香港要塞司令部", name_en:"Fortress HQ", type:"Garrison Command",
       commander:{ zh:"莫德庇", en:"Maj-Gen C.M. Maltby (GOC)", rank:"少將 / Major-General" },
       note:"駐港英軍總指揮；與楊慕琦總督於25日投降。",
       track:[ {d:8,lng:114.158,lat:22.282,s:0,st:"hold"}, {d:25,lng:114.158,lat:22.282,s:0,st:"dead"} ] },
 
-    { id:"uk_royalscots", faction:UK, kind:"infantry", crest:"royalscots", cf:true,
+    { id:"uk_royalscots", faction:UK, kind:"infantry", flag:"union", cf:true,
       name_zh:"皇家蘇格蘭兵團 第二營", name_en:"2nd Royal Scots", type:"British Infantry Bn",
       commander:{ zh:"懷特", en:"Lt-Col S.E.H.E. White", rank:"中校 / Lieutenant-Colonel" },
       note:"守醉酒灣防線西段（城門碉堡）；失守後退守港島西。",
@@ -137,7 +137,7 @@ window.BATTLE_DATA = (function () {
               {d:19,lng:114.185,lat:22.265,s:520,st:"attack"}, {d:22,lng:114.165,lat:22.275,s:380,st:"hold"},
               {d:25,lng:114.165,lat:22.277,s:200,st:"dead"} ] },
 
-    { id:"uk_rajput", faction:UK, kind:"infantry", crest:"rajput", cf:true,
+    { id:"uk_rajput", faction:UK, kind:"infantry", flag:"india", cf:true,
       name_zh:"第7拉吉普兵團 第五營", name_en:"5/7 Rajput Regiment", type:"British Indian Infantry Bn",
       commander:{ zh:"羅林森", en:"Lt-Col J. Cadogan-Rawlinson", rank:"中校 / Lieutenant-Colonel" },
       note:"守防線東段；魔鬼山殿後撤離；港島東北岸首當登陸之衝，損失慘重。",
@@ -145,7 +145,7 @@ window.BATTLE_DATA = (function () {
               {d:13,lng:114.205,lat:22.290,s:850,st:"hold"}, {d:18,lng:114.205,lat:22.292,s:400,st:"dead"},
               {d:20,lng:114.190,lat:22.282,s:250,st:"retreat"}, {d:25,lng:114.180,lat:22.272,s:120,st:"dead"} ] },
 
-    { id:"uk_punjab", faction:UK, kind:"infantry", crest:"punjab", cf:true,
+    { id:"uk_punjab", faction:UK, kind:"infantry", flag:"india", cf:true,
       name_zh:"第14旁遮普兵團 第二營", name_en:"2/14 Punjab Regiment", type:"British Indian Infantry Bn",
       commander:{ zh:"基德", en:"Lt-Col G.R. Kidd", rank:"中校 / Lieutenant-Colonel" },
       note:"大陸掩護/殿後；退守港島西。營長基德21日於蘇雪崗（Shouson Hill）一帶攻擊中陣亡。",
@@ -153,7 +153,7 @@ window.BATTLE_DATA = (function () {
               {d:13,lng:114.155,lat:22.280,s:820,st:"hold"}, {d:19,lng:114.185,lat:22.264,s:560,st:"attack"},
               {d:22,lng:114.160,lat:22.275,s:380,st:"hold"}, {d:25,lng:114.162,lat:22.277,s:220,st:"dead"} ] },
 
-    { id:"uk_middlesex", faction:UK, kind:"infantry", crest:"middlesex", cf:true,
+    { id:"uk_middlesex", faction:UK, kind:"infantry", flag:"union", cf:true,
       name_zh:"米杜息士兵團 第一營", name_en:"1st Middlesex Regiment", type:"Machine-Gun Bn",
       commander:{ zh:"史超域", en:"Lt-Col H.W.M. Stewart", rank:"中校 / Lieutenant-Colonel" },
       note:"維克斯機槍營，守港島沿岸碉堡線；最後退守赤柱。",
@@ -161,7 +161,7 @@ window.BATTLE_DATA = (function () {
               {d:20,lng:114.200,lat:22.250,s:640,st:"retreat"}, {d:24,lng:114.212,lat:22.218,s:520,st:"hold"},
               {d:25,lng:114.212,lat:22.216,s:420,st:"hold"} ] },
 
-    { id:"uk_winnipeg", faction:UK, kind:"infantry", crest:"winnipeg", cf:true,
+    { id:"uk_winnipeg", faction:UK, kind:"infantry", flag:"canada", cf:true,
       name_zh:"溫尼伯榴彈兵團", name_en:"Winnipeg Grenadiers", type:"Canadian Infantry Bn (C Force)",
       commander:{ zh:"修克里夫", en:"Lt-Col J.L.R. Sutcliffe", rank:"中校 / Lieutenant-Colonel" },
       note:"西旅。死守黃泥涌峽、尼克遜山；奧斯本準尉於畢拿山捨身獲維多利亞十字勳章。",
@@ -169,7 +169,7 @@ window.BATTLE_DATA = (function () {
               {d:20,lng:114.183,lat:22.262,s:420,st:"attack"}, {d:22,lng:114.175,lat:22.265,s:300,st:"hold"},
               {d:25,lng:114.178,lat:22.265,s:150,st:"dead"} ] },
 
-    { id:"uk_royalrifles", faction:UK, kind:"infantry", crest:"royalrifles", cf:true,
+    { id:"uk_royalrifles", faction:UK, kind:"infantry", flag:"canada", cf:true,
       name_zh:"皇家加拿大來福槍營", name_en:"Royal Rifles of Canada", type:"Canadian Infantry Bn (C Force)",
       commander:{ zh:"康姆", en:"Lt-Col W.J. Home", rank:"中校 / Lieutenant-Colonel" },
       note:"東旅核心。大潭/赤柱軸線且戰且退，反攻淺水灣，赤柱死守。",
@@ -177,35 +177,35 @@ window.BATTLE_DATA = (function () {
               {d:21,lng:114.205,lat:22.235,s:600,st:"attack"}, {d:24,lng:114.213,lat:22.222,s:460,st:"hold"},
               {d:25,lng:114.213,lat:22.218,s:360,st:"hold"} ] },
 
-    { id:"uk_hkvdc", faction:UK, kind:"infantry", crest:"hkvdc", cf:true,
+    { id:"uk_hkvdc", faction:UK, kind:"infantry", flag:"hk", cf:true,
       name_zh:"香港義勇防衛軍", name_en:"Hong Kong Volunteer Defence Corps", type:"Local Volunteer Force",
       commander:{ zh:"羅斯", en:"Col. H.B. Rose", rank:"上校 / Colonel" },
       note:"本地義勇軍，多族裔；渣甸山、黃泥涌峽、赤柱皆有血戰。羅遜陣亡後羅斯接掌西旅。",
       track:[ {d:13,lng:114.190,lat:22.270,s:1700,st:"hold"}, {d:19,lng:114.189,lat:22.266,s:1100,st:"attack"},
               {d:21,lng:114.180,lat:22.260,s:800,st:"hold"}, {d:25,lng:114.182,lat:22.270,s:400,st:"dead"} ] },
 
-    { id:"uk_westbde", faction:UK, kind:"command", crest:"lawson", cf:false,
+    { id:"uk_westbde", faction:UK, kind:"command", flag:"canada", cf:false,
       name_zh:"西旅司令部（羅遜准將）", name_en:"West Brigade HQ", type:"Brigade Command",
       commander:{ zh:"羅遜", en:"Brig. J.K. Lawson", rank:"准將 / Brigadier" },
       note:"19日約10:00日軍圍攻黃泥涌峽旅部，羅遜稱「出去拼了」陣亡——香港戰役中盟軍陣亡之最高階軍官。",
       track:[ {d:13,lng:114.187,lat:22.264,s:0,st:"hold"}, {d:18,lng:114.187,lat:22.264,s:0,st:"hold"},
               {d:19,lng:114.187,lat:22.263,s:0,st:"dead"} ] },
 
-    { id:"uk_eastbde", faction:UK, kind:"command", crest:"wallis", cf:false,
+    { id:"uk_eastbde", faction:UK, kind:"command", flag:"union", cf:false,
       name_zh:"東旅司令部（華里士准將）", name_en:"East Brigade HQ", type:"Brigade Command",
       commander:{ zh:"華里士", en:"Brig. C. Wallis", rank:"准將 / Brigadier" },
       note:"港島被切斷後率東旅退守赤柱，死戰至26日凌晨。",
       track:[ {d:13,lng:114.215,lat:22.275,s:0,st:"hold"}, {d:19,lng:114.215,lat:22.255,s:0,st:"retreat"},
               {d:22,lng:114.213,lat:22.225,s:0,st:"hold"}, {d:25,lng:114.213,lat:22.218,s:0,st:"hold"} ] },
 
-    { id:"uk_ra", faction:UK, kind:"artillery", crest:"ra", cf:true,
+    { id:"uk_ra", faction:UK, kind:"artillery", flag:"union", cf:true,
       name_zh:"皇家炮兵 香港要塞部隊", name_en:"Royal Artillery (Fortress)", type:"Coast & AA Artillery",
       commander:{ zh:"麥里奧", en:"Brig. T. MacLeod (CRA)", rank:"准將 / Brigadier" },
       note:"赤柱、摩星嶺、鯉魚門等海防砲台與高射砲；末期轉作平射火力。",
       track:[ {d:8,lng:114.135,lat:22.280,s:2500,st:"hold"}, {d:18,lng:114.135,lat:22.280,s:2300,st:"attack"},
               {d:24,lng:114.213,lat:22.218,s:1500,st:"attack"}, {d:25,lng:114.213,lat:22.216,s:1000,st:"dead"} ] },
 
-    { id:"uk_rn", faction:UK, kind:"navy", crest:"rn", cf:true,
+    { id:"uk_rn", faction:UK, kind:"navy", flag:"rn", cf:true,
       name_zh:"皇家海軍香港分遣隊", name_en:"Royal Navy (Hong Kong)", type:"Local Defence Flotilla",
       commander:{ zh:"哥連臣", en:"Cdre A.C. Collinson", rank:"准將/海軍准將 / Commodore" },
       note:"驅逐艦色雷斯人號、炮艇蟬號及2nd MTB魚雷艇隊突擊日軍登陸艇。",
@@ -292,7 +292,7 @@ window.BATTLE_DATA = (function () {
     caveats:[
       "地形為真實資料：高程取自 AWS Terrarium DEM、地表為 EOX Sentinel-2 cloudless 2016（現代衛星影像），以 Web Mercator 投影按真實比例呈現；垂直高度作 2 倍誇張以利判讀（水平比例不變）。",
       "注意：衛星影像與高程均為現代資料——維多利亞港兩岸（中環/灣仔/銅鑼灣/北角/西九龍/觀塘）填海、啟德與赤鱲角機場、青馬大橋等皆為戰後建設，1941年並不存在。1941年的海岸線較今日為窄，故海岸線、登陸灘頭與沿岸部隊位置僅按現代地貌示意，與史實會有偏差。",
-      "家紋為「合理推想」而非考證真跡：酒井、佐野、土井、田中、東海林、北島等未見傳世可考之家紋；本作家紋取自姓氏雙關（土井=井桁、田中=田字、東海林=東‧海‧林）與兵科徽記（櫻花、沼葦、交叉砲、錨），用於軍旗藝術呈現，非斷言其真實紋章。英方則以團徽/兵種徽代之。",
+      "各部隊軍旗採用1941年12月各軍實際旗幟：日本陸軍「旭日旗」（軍旗，圓心居中）、日本海軍軍艦旗（圓心偏向旗桿）、英國聯合旗、加拿大紅船旗（1922–57年綠楓葉版）、英屬印度「印度之星」紅船旗、香港殖民地藍船旗（1876年市景徽）、皇家海軍白船旗——按時代史料繪製、為地圖辨識而簡化（非現代旗幟）。旭日旗為求史實而採用，惟其作為戰時軍國主義象徵具爭議，特此說明。",
       "兵力：日軍「第23軍麾下」上限約52,000（含後方/廣州梯隊）；通行的接戰兵力約26,928（含空海約30,000+）；步兵聯隊各約3,000–4,000。守軍約14,000（含義勇軍，約三分一為印度兵）。",
       "天氣：除18–20日有確鑿之雨/霧/濃煙記載外，逐日溫度與其餘日子多為東北季候風氣候推算（皇家天文台戰時觀測中斷）。",
       "部隊每日位置為配合敘事的示意化部署（錨定於真實地名經緯度），非逐時精確戰術圖。",

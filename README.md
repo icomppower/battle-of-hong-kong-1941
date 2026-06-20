@@ -87,8 +87,11 @@ This is an **illustrative reconstruction**, not an authoritative tactical record
   shoreline unit positions are shown only approximately.
 - **Troop positions are narrative-schematic** — anchored to real place-name coordinates, but not an
   hour-by-hour precise tactical map.
-- **Unit crests are stylised original glyphs / plausible invention**, not official heraldry or
-  current regimental insignia.
+- **Unit markers fly the real national / service flag each force used in December 1941** — the IJA Army War Flag,
+  the IJN Naval Ensign, the Union Flag, the Canadian Red Ensign (green-leaf, 1922–57), the Star of India Red Ensign,
+  the Hong Kong colonial Blue Ensign (1876 badge), and the White Ensign — drawn from period sources and simplified for
+  marker legibility (**not** the modern flags: no maple-leaf flag, no Indian tricolour, no Bauhinia). The Rising Sun is
+  shown for historical accuracy; its status as a contested symbol of wartime militarism is acknowledged.
 
 ## Author
 
