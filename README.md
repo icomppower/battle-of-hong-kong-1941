@@ -9,6 +9,27 @@ backend, no API keys.** It runs from a single folder served over local HTTP.
 
 **▶ Live demo:** <https://keithligh.github.io/battle-of-hong-kong-1941/>
 
+## Gallery
+
+The eighteen-day campaign plays itself as a directed sequence of shots over real Hong Kong terrain — troop
+movements, front lines, attack arrows, weather, and a day/night cycle, narrated bilingually (中／EN). Every
+frame below is the live engine rendering real elevation + satellite imagery; nothing is mocked up.
+
+![黃泥涌峽爭奪戰 — the camera orbiting the battle for Wong Nai Chung Gap, the hinge of the island fighting](docs/demo.gif)
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/invasion.jpg" alt="Japanese 38th Division crossing into the New Territories, 8 December 1941"><br><sub><b>8 Dec · 日軍入侵新界</b> — Sano's 38th Division crosses the Shenzhen River into the New Territories.</sub></td>
+    <td width="50%"><img src="docs/wong-nai-chung-gap.jpg" alt="The battle for Wong Nai Chung Gap on Hong Kong Island"><br><sub><b>黃泥涌峽爭奪戰</b> — the fight for Wong Nai Chung Gap, the hinge of the island battle.</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/repulse-bay.jpg" alt="Fighting at Repulse Bay, 21 December 1941"><br><sub><b>21 Dec · 淺水灣激戰</b> — the Japanese press south past Repulse Bay toward Stanley.</sub></td>
+    <td><img src="docs/fall-of-hong-kong.jpg" alt="The fall of Hong Kong on Christmas Day 1941"><br><sub><b>25 Dec · 黑色聖誕</b> — "Black Christmas": the surrender, ending eighteen days of fighting.</sub></td>
+  </tr>
+</table>
+
+> Geography is **present-day** (satellite + elevation); the 1941 coastline was narrower — see *Historical accuracy* below.
+
 ## Run it locally
 
 Map tiles must be loaded over HTTP (same-origin) — opening `index.html` via `file://` will
