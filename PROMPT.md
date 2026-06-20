@@ -1,7 +1,10 @@
 # The Prompt
 
-This project — a self-playing 3D TV-documentary of the **Battle of Hong Kong (8–25 December 1941)** — was built
-from a single brief. Hand the prompt below to an AI coding agent (e.g. Claude Code) to recreate it from scratch.
+This is the brief the project was built from — a self-playing 3D TV-documentary of the **Battle of Hong Kong
+(8–25 December 1941)**. It is the *starting point*, **not a one-shot recipe**: the finished app took many passes beyond
+this prompt — researching and cross-checking the history, getting the 1941 flags and dates right, writing the
+narration, tuning the visuals, and fixing bugs. Hand it to an AI coding agent (e.g. Claude Code) to build a project of
+this kind, then plan to iterate and **verify the history yourself**.
 
 ```
 Introduce the "Battle of Hong Kong" (8–25 Dec 1941, 18 days) as a TV-documentary-style 3D production with cinematic
