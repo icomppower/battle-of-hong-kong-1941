@@ -1,10 +1,10 @@
 /* =====================================================================
  *  config.js: Battle of Hong Kong 1941 · tunables, data handle, utilities
- *  The loud-failure guard (No Fallback), the CFG/FAC constants, small math,
+ *  The loud-failure guard, the CFG/FAC constants, small math,
  *  and the boot helpers. Imported by every other module; imports nothing.
  * ===================================================================== */
 
-/* ---- fail loudly, never silently (Philosophy: No Fallback) -------- *
+/* ---- fail loudly, never silently -------------------------------- *
  *  First error wins (shown-once) so the root cause is what the user sees,
  *  not a cascade of follow-on failures.                                 */
 let shown = false;

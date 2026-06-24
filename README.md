@@ -88,6 +88,14 @@ Map tiles must be loaded over HTTP (same-origin). Opening `index.html` via `file
 - Everything is data-driven from `data.js` (forces, dated movement tracks, front lines, weather, storyboard,
   narration). `app.js` and its ES modules are the engine; `index.html` is the page.
 
+## Build your own
+
+This documentary is built on **[cinematic-3d-battle-engine](https://github.com/keithligh/cinematic-3d-battle-engine)**,
+an open-source engine that renders any battle, historical or fictional, as a self-playing 3D documentary on real-scale
+satellite and elevation terrain. You describe a battle in a data file and the engine renders it: no build, no backend,
+no API keys. Clone the engine, follow its
+**[PLAYBOOK](https://github.com/keithligh/cinematic-3d-battle-engine/blob/main/PLAYBOOK.md)**, and make your own.
+
 ## Licensing
 
 - **Code** (the `.js` source, `index.html`, `tools/`): **MIT**, see [`LICENSE`](LICENSE).
